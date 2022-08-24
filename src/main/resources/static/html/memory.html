@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="../js/echarts.js"></script>
+    <script type="text/javascript" src="../js/jquery-3.6.0.min.js"></script>
+    <title>Title</title>
+    <script type="text/javascript">
+        //请求接口频率
+        var time = 5000;
+        //刷新数据频率
+        var fulshTime = 5000;
+        //实时用量保留小数位
+        var valueNum=1;
+        //指示盘实时用量字体大小
+        var fontSizeNum=14;
+        var response;
+        var that =this;
+        // var searchParam=window.location.search;
+        // console.log(window.location.port);
+        // console.log(window.location.host);
+        // console.log(window.location.origin);
+        // console.log(searchParam);
+        var url = window.location.origin+"/ldyMemoryGet";
+        $.ajax({
+            url:url,
+            async: false,
+            success: function(response) {
+                that.response = response;
+                $("#YGC").html(response.YGC);
+                // nextSource = (response.S0U/1024).toFixed(2);
+                // _valOnRadianMax = (response.S0C/1024).toFixed(2);
+            }
+        });
+        setInterval(function () {
+            $.ajax({
+                url:url,
+                success: function(response){
+                    that.response = response;
+                }
+            });
+            $("#YGC").html(that.response.YGC);
+            $("#YGCT").html(that.response.YGCT);
+            $("#FGC").html(that.response.FGC);
+            $("#FGCT").html(that.response.FGCT);
+            $("#GCT").html(that.response.GCT);
+        }, that.time);
+    </script>
+</head>
+<body>
+    <div style="width: 100%;border-radius: 20px">
+        <div style="width:900px;height: 300px">
+            <H3>年轻代</H3>
+            <div style="float: left">
+                <span style="width:100%;">堆使用情况(MB):</span>
+                <div id="eden" style="width: 300px;height:300px;"></div>
+            </div>
+            <div style="float: left;">
+                <span style="width: 100%;left: auto">survivor0使用情况(MB):</span>
+                <div id="survivor0" style="width: 300px;height:300px;"></div>
+            </div>
+            <div style="float: left;">
+                <span style="width: 100%;">survivor1使用情况(MB):</span>
+                <div id="survivor1" style="width: 300px;height:300px;"></div>
+            </div>
+        </div>
+        <div style="width: 900px">
+            <div style="float: left">
+                <H3>老年代</H3>
+                </br>
+                <span style="width: 100%;">oldGen区使用情况(MB):</span>
+                <div id="oldGen" style="width: 300px;height:300px;"></div>
+            </div>
+            <div style="float: left">
+                <H3>永久代/方法区(元数据)</H3>
+                <span style="width: 100%; font-size: 12px">class类模型，静态变量。本地内存。初始大小为21M</span>
+                </br>
+                <span style="width: 100%;">PermGen/MetaSpace区使用情况(MB):</span>
+                <div id="PcMc" style="width: 300px;height:300px;"></div>
+            </div>
+            <div style="float: left;">
+                <H3>垃圾回收信息</H3>
+                <div style="width: 300px;height: 300px">
+                    <label style="display: block;margin-top: 30px;">YGC 发生的次数: <span id="YGC"></span></label>
+                    <label style="display: block;margin-top: 30px;">YGC 共消耗的时间(s): <span id="YGCT"></span></label>
+                    <label style="display: block;margin-top: 30px;">FGC 发生的次数: <span id="FGC"></span></label>
+                    <label style="display: block;margin-top: 30px;">FGC 共消耗的时间(s): <span id="FGCT"></span></label>
+                    <label style="display: block;margin-top: 30px;">GC 总用时(s): <span id="GCT"></span></label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $("#YGC").html(that.response.YGC);
+        $("#YGCT").html(that.response.YGCT);
+        $("#FGC").html(that.response.FGC);
+        $("#FGCT").html(that.response.FGCT);
+        $("#GCT").html(that.response.GCT);
+        var edenDom2 = document.getElementById('eden');
+        var myChartEden = echarts.init(edenDom2);
+        var optionEden;
+        optionEden = {
+            tooltip: {
+                formatter: '{a} <br/>{b} : {c}MB'
+            },
+            series: [
+                {
+                    name: 'eden 区',
+                    type: 'gauge',
+                    progress: {
+                        show: true
+                    },
+                    max:Math.ceil((that.response.EC/1024)),
+                    detail: {
+                        valueAnimation: true,
+                        formatter: '{value}',
+                        textStyle:{
+                            fontSize:fontSizeNum
+                        }
+                    },
+                    data: [
+                        {
+                            value: (that.response.EU/1024).toFixed(valueNum),
+                            name: 'eden区'
+                        }
+                    ]
+                }
+            ]
+        };
+        optionEden && myChartEden.setOption(optionEden);
+        setInterval(function () {
+            var nextSource=0;
+            var _valOnRadianMax=0;
+                    nextSource = (that.response.EU/1024).toFixed(valueNum);
+                    _valOnRadianMax = Math.ceil(that.response.EC/1024);
+                    myChartEden.setOption({
+                        series: [{
+                            max: _valOnRadianMax,
+                            data: [{
+                                value: nextSource,
+                                name: 'eden区'
+                            }]
+                        }]
+                    });
+        }, that.fulshTime);
+
+    </script>
+    <script type="text/javascript">
+        var chartDom = document.getElementById('survivor0');
+        var myChart = echarts.init(chartDom);
+        var option;
+        option = {
+            tooltip: {
+                formatter: '{a} <br/>{b} : {c}MB'
+            },
+            series: [
+                {
+                    name: 'Survivor 0区',
+                    type: 'gauge',
+                    progress: {
+                        show: true
+                    },
+                    max:Math.ceil((that.response.S0C/1024)),
+                    detail: {
+                        valueAnimation: true,
+                        formatter: '{value}',
+                        textStyle:{
+                            fontSize:fontSizeNum
+                        }
+                    },
+                    data: [
+                        {
+                            value: (that.response.S0U/1024).toFixed(valueNum),
+                            name: 'Survivor 0区'
+                        }
+                    ]
+                }
+            ]
+        };
+        option && myChart.setOption(option);
+        setInterval(function () {
+            var nextSource = (that.response.S0U/1024).toFixed(valueNum);
+            var _valOnRadianMax = Math.ceil(that.response.S0C/1024);
+            myChart.setOption({
+                series: [{
+                    max: _valOnRadianMax,
+                    data: [{
+                        value: nextSource,
+                        name: 'Survivor 0区'
+                    }]
+                }]
+            });
+        },that.fulshTime);
+    </script>
+    <script type="text/javascript">
+        var chartDom2 = document.getElementById('survivor1');
+        var myChart2 = echarts.init(chartDom2);
+        var option2;
+        option2 = {
+            tooltip: {
+                formatter: '{a} <br/>{b} : {c}MB'
+            },
+            series: [
+                {
+                    name: 'Survivor 1区',
+                    type: 'gauge',
+                    progress: {
+                        show: true
+                    },
+                    max:Math.ceil((that.response.S1C/1024)),
+                    detail: {
+                        valueAnimation: true,
+                        formatter: '{value}',
+                        textStyle:{
+                            fontSize:fontSizeNum
+                        }
+                    },
+                    data: [
+                        {
+                            value: (that.response.S1U/1024).toFixed(valueNum),
+                            name: 'Survivor 1区'
+                        }
+                    ]
+                }
+            ]
+        };
+        option2 && myChart2.setOption(option2);
+        setInterval(function () {
+            var nextSource = (that.response.S1U / 1024).toFixed(valueNum);
+            var _valOnRadianMax = Math.ceil(that.response.S1C / 1024);
+            myChart2.setOption({
+                series: [{
+                    max: _valOnRadianMax,
+                    data: [{
+                        value: nextSource,
+                        name: 'Survivor 1区'
+                    }]
+                }]
+            });
+        }, that.fulshTime);
+    </script>
+    <script type="text/javascript">
+        var oldGenDom = document.getElementById('oldGen');
+        var myChartOldGen = echarts.init(oldGenDom);
+        var optionOldGen;
+        optionOldGen = {
+            tooltip: {
+                formatter: '{a} <br/>{b} : {c}MB'
+            },
+            series: [
+                {
+                    name: 'oldGen',
+                    type: 'gauge',
+                    progress: {
+                        show: true
+                    },
+                    max:Math.ceil(that.response.OC/1024),
+                    detail: {
+                        valueAnimation: true,
+                        formatter: '{value}',
+                        textStyle:{
+                            fontSize:fontSizeNum
+                        }
+                    },
+                    data: [
+                        {
+                            value: (that.response.OU/1024).toFixed(valueNum),
+                            name: 'oldGen'
+                        }
+                    ]
+                }
+            ]
+        };
+        optionOldGen && myChartOldGen.setOption(optionOldGen);
+        setInterval(function () {
+            var nextSource = (that.response.OU/1024).toFixed(valueNum);
+            var _valOnRadianMax = Math.ceil((that.response.OC/1024));
+            myChartOldGen.setOption({
+                series: [{
+                    max: _valOnRadianMax,
+                    data: [{
+                        value: nextSource,
+                        name: 'oldGen'
+                    }]
+                }]
+            });
+        }, that.fulshTime);
+
+    </script>
+    <script type="text/javascript">
+        var pcMcDom = document.getElementById('PcMc');
+        var myChartPcMc = echarts.init(pcMcDom);
+        var optionPcMc;
+        optionPcMc = {
+            tooltip: {
+                formatter: '{a} <br/>{b} : {c}MB'
+            },
+            series: [
+                {
+                    name: 'PcMc',
+                    type: 'gauge',
+                    progress: {
+                        show: true
+                    },
+                    max:Math.ceil((typeof(that.response.PC)=="undefined"?that.response.MC:that.response.PC)/1024),
+                    detail: {
+                        valueAnimation: true,
+                        formatter: '{value}',
+                        textStyle:{
+                            fontSize:fontSizeNum
+                        }
+                    },
+                    data: [
+                        {
+                            value: ((typeof(that.response.PU)=="undefined"?that.response.MU:that.response.PU)/1024).toFixed(valueNum),
+                            name: 'PcMc'
+                        }
+                    ]
+                }
+            ]
+        };
+        optionPcMc && myChartPcMc.setOption(optionPcMc);
+        setInterval(function () {
+            var nextSource = ((typeof(that.response.PU)=="undefined"?that.response.MU:that.response.PU)/1024).toFixed(valueNum);
+            var _valOnRadianMax = Math.ceil((typeof(that.response.PC)=="undefined"?that.response.MC:that.response.PC)/1024);
+            myChartPcMc.setOption({
+                series: [{
+                    max: _valOnRadianMax,
+                    data: [{
+                        value: nextSource,
+                        name: 'PcMc'
+                    }]
+                }]
+            });
+        }, that.fulshTime);
+
+    </script>
+
+</body>
+</html>

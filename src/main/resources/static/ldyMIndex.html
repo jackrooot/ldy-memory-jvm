@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <link rel = "icon" href ="images/app.png">
+    <title>霖点雨监控</title>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" >
+    <script type="text/javascript" src="js/echarts.js"></script>
+    <script type="text/javascript" src="js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        var url = window.location.origin+"/ldyDumpDown";
+        var response;
+        var that = this;
+        function downDump() {
+            window.location.href=url;
+            // $.ajax({
+            //     url:url,
+            //     async: false,
+            //     success: function(response) {
+            //         that.response = response;
+            //         // $("#YGC").html(response.YGC);
+            //         // nextSource = (response.S0U/1024).toFixed(2);
+            //         // _valOnRadianMax = (response.S0C/1024).toFixed(2);
+            //     }
+            // });
+        }
+    </script>
+</head>
+<body style="">
+    <div class="container-fluid" style="width: 1300px;background-color: #dbdbdb" >
+        <div style="height: 90%">
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="headTitle" style="height:50px;width:150px;"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-10"></div>
+                <div class="col-md-2">
+                    <div style="margin-left: 20px;height: 45px">
+                        <button type="button" class="btn btn-info" onclick="downDump()">下载DUMP文件</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3" style="height: 57em;">
+                    <ul class="nav nav-pills nav-stacked">
+                        <li role="presentation" class="active"><a href="#">系统运行监控</a></li>
+                        <li role="presentation" ><a href="#">JVM</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-9" style="height: 60em;">
+                    <iframe id="memoryPage" style="background-color: snow; border-radius: 20px"
+                            src="html/memory.html"
+                            frameborder="0" scrolling="no" width="100%" height="800em"></iframe>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    var chartDom = document.getElementById('headTitle');
+    var myChart = echarts.init(chartDom);
+    var option;
+    option = {
+        graphic: {
+            elements: [
+                {
+                    type: 'text',
+                    left: 'center',
+                    top: 'center',
+                    style: {
+                        text: '霖点雨监控系统',
+                        fontSize: 20,
+                        fontWeight: 'bold',
+                        // lineDash: [0, 200],
+                        // lineDash: [0, 0],
+                        // lineDashOffset: 0,
+                        fill: 'transparent',
+                        stroke: '#FFFFFF',
+                        // stroke: '#009e7e',
+                        // lineWidth: 1
+                        lineWidth: 0
+                    },
+                    keyframeAnimation: {
+                        duration: 4000,
+                        loop: true,
+                        keyframes: [
+                            {
+                                // percent: 0.7,
+                                percent: 0.5,
+                                style: {
+                                    fill: '#009e7e',
+                                    // lineDashOffset: 200,
+                                    // lineDashOffset: 0,
+                                    // lineDash: [200, 0]
+                                    // lineDash: [0, 0]
+                                }
+                            },
+                            {
+                                // Stop for a while.
+                                // percent: 0.8,
+                                percent: 0.5,
+                                style: {
+                                    // fill: 'transparent'
+                                    fill: '#009e7e'
+                                }
+                            },
+                            {
+                                percent: 0.8,
+                                style: {
+                                    fill: '#FFFFFF'
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    };
+    option && myChart.setOption(option);
+</script>
